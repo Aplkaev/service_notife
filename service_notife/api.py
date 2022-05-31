@@ -26,23 +26,28 @@ class MailingDetailAPIView(RetrieveAPIView):
     serializer_class = serializers.ClientSerializer
 
     def get_queryset(self):
-        return models.Mailing.objects.filter(draft=False)
+        return models.Mailing.objects.all()
 
 
 class MailingUpdateAPIView(UpdateAPIView):
     # обновления атрибутов рассылки
     serializer_class = serializers.ClientSerializer
+    def get_queryset(self):
+        return models.Mailing.objects.all()
 
 
 class MailingRemoveAPIView(DestroyAPIView):
     # удаления рассылки
     serializer_class = serializers.ClientSerializer
+    def get_queryset(self):
+        return models.Mailing.objects.all()
 
 
 class MailingStartAPIView(UpdateAPIView):
     # обработки активных рассылок и отправки сообщений клиентам
     serializer_class = serializers.ClientSerializer
-
+    def get_queryset(self):
+        return models.Mailing.objects.all()
 
 # class MessageListAPIView(ListAPIView):
 #     serializer_class = serializers.MessageSerializer

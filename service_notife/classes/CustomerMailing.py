@@ -43,10 +43,12 @@ class CustomerMailing:
         response = None
         try:
             # запрос на другой сервис
-            response = requests.post("http://127.0.0.1:8000/api/test/", data={
+            response = requests.post("ttps://probe.fbrq.cloud/v1/send/", data={
+                'id': '',
                 'phone': client.phone,
-                'message': self._mailing.message
-            })
+                'text': self._mailing.message
+            }, headers={
+                'Authorization': 'access_token eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODUwMjcwNjAsImlzcyI6ImZhYnJpcXVlIiwibmFtZSI6IkBhcGxrYWV2In0.mgmUkRQwY8sQbjeOXKwpgx1GeWAAj6-JQOAlOq_8v3Y'})
         except Exception as e:
             print('error response', e)
             return {}
@@ -56,24 +58,32 @@ class CustomerMailing:
 
         # получаем статус и id сообщения
         message = json.loads(response.text)
-        if message['status'] == 'success':
-            return message
-        return {}
+        message['code'] = response.status_code
+        return message
 
-    def _save_message(self, result: dict, client: Client) -> bool:
+    def _save_message(self, client: Client) -> bool:
         """
             Сохраняем письмо
-        :param result:  результат от сервиса {id:int, status:int}
         :param client:
         :return: результат сохранения
         """
         message = Message(
             time=datetime.now(),
-            status=result['deliver'],
             mailing=self._mailing,
+            status=-1,
             client=client
         )
         message.save()
+        return message
+
+    def _update_message(self, message: Message, code: int) -> bool:
+        """
+        Обновляем код сообщения
+        :param message:
+        :param code:
+        :return:
+        """
+        Message.objects.get(pk=message.id).update(status=code)
 
     def start(self) -> bool:
         """
@@ -86,10 +96,10 @@ class CustomerMailing:
 
         clients = self._get_clients()
         for client in clients:
+            message = self._save_message(client)
             result = self._request_message(client)
-            # пришло теле результата
-            if 'deliver' in result:
-                self._save_message(result, client)
+            if 'code' in result:
+                self._update_message(message, result['code'])
 
     def get_mailing(self):
         """

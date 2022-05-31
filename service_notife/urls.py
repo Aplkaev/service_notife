@@ -27,7 +27,5 @@ urlpatterns = [
 
     # тест для запрос API
     path('api/test/', views.test_request_api),
-    # запуск
-    path('api/start/<int:pk>', views.start_message),
     path('api/start/', views.chec_start_message),
 ]

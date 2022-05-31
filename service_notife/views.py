@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.core import serializers
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import utc
@@ -16,7 +16,7 @@ from .classes.CustomerMailing import CustomerMailing
 
 
 def index(request):
-    return render(request, 'main/index.html')
+    return redirect('/swagger/')
 
 
 @csrf_exempt
@@ -39,22 +39,6 @@ def test_request_api(request):
         'deliver': 1,
         'id': int(datetime.now().timestamp())
     })
-
-
-@csrf_exempt
-def start_message(request):
-    """
-        Запуск рассылки
-    """
-    # получаем из запрос id рассылки
-    id = int(request.GET['id'])
-
-    mailing = CustomerMailing(id)
-    mailing.start()
-    return JsonResponse({
-        'item': serializers.serialize("json", [mailing.get_mailing(), ])
-    })
-
 
 @csrf_exempt
 def chec_start_message(request):
